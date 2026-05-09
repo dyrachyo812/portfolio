@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Портфолио — Богдан | Контакты</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=JetBrains+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #0d0f14;
+      --bg2:     #13161e;
+      --bg3:     #1a1e28;
+      --border:  #252a38;
+      --accent:  #7eb8f7;
+      --accent2: #a78bfa;
+      --gold:    #f0a84a;
+      --text:    #d4d8e8;
+      --muted:   #6b7194;
+      --dim:     #3d4260;
+      --green:   #5eead4;
+      --red:     #f87171;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Lora', Georgia, serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 80px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Прогресс-полоска ── */
+    #scroll-bar {
+      position: fixed; top: 0; left: 0;
+      height: 3px; width: 0%;
+      background: linear-gradient(90deg, var(--accent2), var(--accent), var(--green));
+      z-index: 300;
+    }
+
+    /* ── Шапка ── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+      animation: fadeDown 0.7s ease both;
+    }
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      color: #fff;
+      line-height: 1.15;
+      margin-bottom: 8px;
+    }
+    .header h1 span { color: var(--accent); }
+    .header p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    /* ── Основной блок ── */
+    .container {
+      width: 100%;
+      max-width: 700px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ── Форма ── */
+    .form-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 40px;
+      animation: fadeUp 0.6s ease 0.1s both;
+    }
+    .form-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: #e8ecf8;
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-card h2::before {
+      content: '';
+      width: 4px; height: 1.3em;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    input, textarea {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(126, 184, 247, 0.12);
+    }
+    input.error, textarea.error {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+    }
+    input.valid, textarea.valid {
+      border-color: var(--green);
+    }
+    textarea { resize: vertical; min-height: 120px; }
+
+    .error-msg {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--red);
+      min-height: 16px;
+      transition: opacity 0.2s;
+    }
+
+    /* ── Кнопка отправки ── */
+    .btn-submit {
+      width: 100%;
+      padding: 13px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: var(--bg);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      margin-top: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-submit:hover  { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ── Уведомление о результате ── */
+    .alert {
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 0.9rem;
+      display: none;
+      margin-top: 16px;
+      animation: fadeUp 0.3s ease;
+    }
+    .alert.success {
+      display: block;
+      background: rgba(94, 234, 212, 0.08);
+      border: 1px solid var(--green);
+      color: var(--green);
+    }
+    .alert.error-alert {
+      display: block;
+      background: rgba(248, 113, 113, 0.08);
+      border: 1px solid var(--red);
+      color: var(--red);
+    }
+    .alert strong { display: block; margin-bottom: 4px; }
+
+    /* ── Блок с сообщениями (лог) ── */
+    .messages-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 40px;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+    .messages-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      color: #e8ecf8;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .messages-card h2::before {
+      content: '';
+      width: 4px; height: 1.3em;
+      background: linear-gradient(180deg, var(--gold), var(--accent2));
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .msg-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .msg-item {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      position: relative;
+      animation: fadeUp 0.35s ease both;
+    }
+    .msg-item .msg-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .msg-item .msg-name {
+      font-weight: 600;
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+    .msg-item .msg-time {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--dim);
+      white-space: nowrap;
+    }
+    .msg-item .msg-subject {
+      font-size: 0.82rem;
+      color: var(--gold);
+      margin-bottom: 4px;
+      font-style: italic;
+    }
+    .msg-item .msg-text {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .msg-item .msg-email {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--dim);
+      margin-top: 6px;
+    }
+    .btn-delete {
+      position: absolute;
+      top: 12px; right: 14px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-delete:hover { border-color: var(--red); color: var(--red); }
+
+    .empty-state {
+      text-align: center;
+      padding: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--dim);
+    }
+
+    /* ── Анимации ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0);    }
+    }
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0);     }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="scroll-bar"></div>
+
+  <div class="header">
+    <h1>Связаться со <span>мной</span></h1>
+    <p>// REST API · Node.js · Docker · Portfolio</p>
+  </div>
+
+  <div class="container">
+
+    <!-- ══ ФОРМА ══ -->
+    <div class="form-card">
+      <h2>Напишите мне</h2>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">Имя *</label>
+          <input type="text" id="name" placeholder="Богдан" autocomplete="name">
+          <span class="error-msg" id="err-name"></span>
+        </div>
+        <div class="form-group">
+          <label for="email">Email *</label>
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+          <span class="error-msg" id="err-email"></span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="subject">Тема *</label>
+        <input type="text" id="subject" placeholder="По поводу стажировки...">
+        <span class="error-msg" id="err-subject"></span>
+      </div>
+
+      <div class="form-group">
+        <label for="message">Сообщение *</label>
+        <textarea id="message" placeholder="Напишите ваше сообщение..."></textarea>
+        <span class="error-msg" id="err-message"></span>
+      </div>
+
+      <button class="btn-submit" id="btn-submit">Отправить сообщение</button>
+
+      <div class="alert" id="alert"></div>
+    </div>
+
+    <!-- ══ ЛОГ ВХОДЯЩИХ СООБЩЕНИЙ ══ -->
+    <div class="messages-card">
+      <h2>Отправленные сообщения</h2>
+      <div class="msg-list" id="msg-list">
+        <div class="empty-state" id="empty-state">Сообщений пока нет</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="form.js"></script>
+</body>
+</html>
