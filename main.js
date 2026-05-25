@@ -11,13 +11,18 @@ function updateProgress() {
 }
 
 /* ══════════════════════════════════════
-   2. THEME TOGGLE — circular ripple from button
+   2. THEME TOGGLE — zero-jank ripple
+   Strategy:
+   - add .theme-switching to kill all transitions instantly
+   - set CSS vars for ripple origin
+   - startViewTransition applies new theme under the ripple
+   - remove .theme-switching after transition ends
 ══════════════════════════════════════ */
 const html     = document.documentElement;
 const themeBtn = document.getElementById('theme-btn');
 const overlay  = document.getElementById('theme-overlay');
 let isDark     = true;
-let switching  = false;  // prevent double-click glitch
+let switching  = false;
 
 themeBtn.addEventListener('click', () => {
   if (switching) return;
@@ -27,49 +32,52 @@ themeBtn.addEventListener('click', () => {
   const newTheme = isDark ? 'dark' : 'light';
   const emoji    = isDark ? '☀️' : '🌙';
 
-  // Get button center coordinates for ripple origin
+  // Ripple origin = button center
   const rect = themeBtn.getBoundingClientRect();
-  const ox = rect.left + rect.width  / 2;
-  const oy = rect.top  + rect.height / 2;
+  const ox   = (rect.left + rect.width  / 2).toFixed(1);
+  const oy   = (rect.top  + rect.height / 2).toFixed(1);
+
+  // Kill all element transitions instantly (prevents 31 simultaneous repaints)
+  html.classList.add('theme-switching');
 
   // ── View Transitions API (Chrome 111+) ──────────────
   if (document.startViewTransition) {
-    // Set ripple origin BEFORE starting transition
     html.style.setProperty('--vt-x', ox + 'px');
     html.style.setProperty('--vt-y', oy + 'px');
 
-    const transition = document.startViewTransition(() => {
+    const t = document.startViewTransition(() => {
       html.setAttribute('data-theme', newTheme);
       themeBtn.textContent = emoji;
     });
 
-    transition.finished.then(() => { switching = false; });
+    t.ready.then(() => {
+      // Re-enable transitions after new frame is painted
+      requestAnimationFrame(() => {
+        html.classList.remove('theme-switching');
+      });
+    });
+
+    t.finished.then(() => { switching = false; });
     return;
   }
 
-  // ── Fallback: scale-up overlay (Firefox / Safari) ───
-  // Position overlay at button center
+  // ── Fallback: overlay scale (Firefox / Safari) ──────
   overlay.style.setProperty('--ox', ox + 'px');
   overlay.style.setProperty('--oy', oy + 'px');
 
-  // Force the overlay to the NEW theme color
-  // Temporarily set attribute so CSS picks correct bg color
+  // Snap to new theme color, then animate
   html.setAttribute('data-theme', newTheme);
-
-  // Reset scale without transition, then animate in
-  overlay.style.transition = 'none';
-  overlay.classList.remove('expanding');
-  void overlay.offsetWidth; // reflow
-
-  overlay.style.transition = '';
-  overlay.classList.add('expanding');
   themeBtn.textContent = emoji;
 
-  // After animation, remove overlay
+  // Force style recalc before adding transition class
+  overlay.getBoundingClientRect();
+  overlay.classList.add('expanding');
+
   setTimeout(() => {
     overlay.classList.remove('expanding');
+    html.classList.remove('theme-switching');
     switching = false;
-  }, 650);
+  }, 580);
 });
 
 /* ══════════════════════════════════════
@@ -150,7 +158,8 @@ function highlightNav() {
 }
 
 /* ══════════════════════════════════════
-   6. UNIFIED SCROLL HANDLER (RAF throttle)
+   6. UNIFIED SCROLL HANDLER
+   Uses passive listener + RAF — zero blocking
 ══════════════════════════════════════ */
 let ticking = false;
 
@@ -163,4 +172,11 @@ window.addEventListener('scroll', () => {
     });
     ticking = true;
   }
-});
+}, { passive: true }); /* passive: true tells browser no preventDefault → smoother scroll */
+
+/* Preload fonts to avoid FOUT causing layout shifts */
+if ('fonts' in document) {
+  document.fonts.ready.then(() => {
+    document.body.classList.add('fonts-loaded');
+  });
+}

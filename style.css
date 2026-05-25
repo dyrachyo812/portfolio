@@ -41,52 +41,60 @@
 }
 
 /* ══════════════════════════════════════
-   THEME SWITCH — circular ripple from button
+   THEME SWITCH — GPU-accelerated ripple
+   Only opacity/transform/clip-path — zero reflow
 ══════════════════════════════════════ */
 
-/* View Transitions API (Chrome 111+) — smooth ripple, marquee keeps running */
+/* Disable ALL transitions during theme switch to prevent jank */
+html.theme-switching * {
+  transition: none !important;
+}
+
+/* View Transitions API — clip-path runs on compositor thread */
 ::view-transition-old(root) {
-  animation: none;            /* old snapshot stays frozen underneath */
+  animation: none;
   mix-blend-mode: normal;
 }
 ::view-transition-new(root) {
-  animation: vt-ripple 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: vt-ripple 0.55s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   mix-blend-mode: normal;
+  will-change: clip-path;
 }
 @keyframes vt-ripple {
   from { clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%)); }
   to   { clip-path: circle(200vmax at var(--vt-x, 50%) var(--vt-y, 50%)); }
 }
 
-/* Exclude marquee from view-transition so it never freezes */
+/* Isolate marquee — keeps spinning during theme transition */
 .marquee-wrap {
   view-transition-name: marquee-strip;
+  will-change: transform;
 }
 ::view-transition-old(marquee-strip),
 ::view-transition-new(marquee-strip) {
   animation: none;
 }
 
-/* Fallback overlay for Firefox / Safari */
+/* Fallback overlay (Firefox/Safari) — transform only, no layout */
 #theme-overlay {
   position: fixed;
   inset: 0;
   z-index: 9990;
   pointer-events: none;
   border-radius: 50%;
-  width: 0; height: 0;
+  width: 300vmax;
+  height: 300vmax;
   top: var(--oy, 50%);
   left: var(--ox, 50%);
   transform: translate(-50%, -50%) scale(0);
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-              border-radius 0s;
   will-change: transform;
+  /* NO transition here — controlled via JS class */
 }
 [data-theme="dark"]  #theme-overlay { background: #080808; }
 [data-theme="light"] #theme-overlay { background: #f5f4f0; }
 #theme-overlay.expanding {
-  width: 300vmax; height: 300vmax;
   transform: translate(-50%, -50%) scale(1);
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ══════════════════════════════════════
@@ -411,6 +419,8 @@ section {
   display: flex;
   animation: marquee 28s linear infinite;
   white-space: nowrap;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 .marquee-wrap:hover .marquee-track { animation-play-state: paused; }
 
@@ -451,8 +461,8 @@ section {
   padding: 28px;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s,
-              background var(--transition-theme);
+  will-change: transform;
+  transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
 }
 
 .project-card::before {
@@ -543,7 +553,8 @@ section {
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 24px 20px;
-  transition: border-color 0.3s, transform 0.3s, background var(--transition-theme);
+  will-change: transform;
+  transition: border-color 0.3s, transform 0.3s;
 }
 .process-card:hover {
   border-color: var(--accent);
@@ -598,7 +609,8 @@ section {
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-  transition: border-color 0.25s, transform 0.25s, background var(--transition-theme);
+  will-change: transform;
+  transition: border-color 0.25s, transform 0.25s;
 }
 .skill-item:hover {
   border-color: var(--accent);
@@ -729,12 +741,14 @@ footer a:hover { color: var(--accent); }
 ══════════════════════════════════════ */
 .reveal {
   opacity: 0;
-  transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translate3d(0, 28px, 0);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+  will-change: opacity, transform;
 }
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate3d(0, 0, 0);
+  will-change: auto; /* release after animation */
 }
 
 .reveal-d1 { transition-delay: 0.1s; }
