@@ -956,3 +956,35 @@ footer a:hover { color: var(--accent); }
     white-space: nowrap;
   }
 }
+/* Project buttons */
+.p-links {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.p-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.p-btn:hover { opacity: 0.75; }
+
+.p-btn-gh {
+  background: rgba(255,255,255,0.08);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.p-btn-demo {
+  background: rgba(255,255,255,0.15);
+  color: inherit;
+  border: 1px solid rgba(255,255,255,0.2);
+}
