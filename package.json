@@ -1,0 +1,14 @@
+{
+  "name": "bogdan-petrenko-portfolio",
+  "version": "1.0.0",
+  "description": "Portfolio landing page for Bogdan Petrenko — Full-Stack Developer & Bot Engineer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
